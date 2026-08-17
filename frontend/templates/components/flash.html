@@ -1,0 +1,17 @@
+<!-- Flash Messages Component -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show shadow-sm mb-2"
+           role="alert" style="font-size:0.875rem;">
+        {% if category == 'success' %}<i class="bi bi-check-circle-fill me-1"></i>
+        {% elif category == 'danger' or category == 'error' %}<i class="bi bi-x-circle-fill me-1"></i>
+        {% elif category == 'warning' %}<i class="bi bi-exclamation-triangle-fill me-1"></i>
+        {% else %}<i class="bi bi-info-circle-fill me-1"></i>
+        {% endif %}
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}

@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+{% block title %}Reports{% endblock %}
+
+{% block content %}
+{% set status = data.get('status_counts', {}) if data else {} %}
+{% set categories = data.get('category_counts', []) if data else [] %}
+{% set priorities = data.get('priority_counts', []) if data else [] %}
+{% set trends = data.get('resolution_trends', []) if data else [] %}
+{% set engineers = data.get('engineer_performance', []) if data else [] %}
+
+<div class="page-header">
+  <h1><i class="bi bi-file-earmark-bar-graph me-2 text-primary"></i>Reports</h1>
+  <p>Detailed support metrics and tabular breakdowns for export-ready reporting.</p>
+</div>
+
+<!-- ── Status Summary ── -->
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="sp-card text-center">
+      <div style="font-size:2.5rem;font-weight:700;color:#2563eb;">{{ status.get('total', 0) }}</div>
+      <div class="kpi-label">Total Tickets</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="sp-card text-center">
+      <div style="font-size:2.5rem;font-weight:700;color:#d97706;">{{ status.get('pending', 0) }}</div>
+      <div class="kpi-label">Pending</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="sp-card text-center">
+      <div style="font-size:2.5rem;font-weight:700;color:#16a34a;">{{ status.get('resolved', 0) }}</div>
+      <div class="kpi-label">Resolved</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="sp-card text-center">
+      <div style="font-size:2.5rem;font-weight:700;color:#475569;">{{ status.get('closed', 0) }}</div>
+      <div class="kpi-label">Closed</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+
+  <!-- ── Category Table ── -->
+  <div class="col-md-6">
+    <div class="sp-card h-100">
+      <div class="sp-card-header">
+        <h5 class="sp-card-title"><i class="bi bi-tags me-1 text-primary"></i>Category Breakdown</h5>
+      </div>
+      {% if categories %}
+      <table class="sp-table">
+        <thead><tr><th>Category</th><th>Count</th></tr></thead>
+        <tbody>
+          {% for c in categories | sort(attribute='count', reverse=True) %}
+          <tr>
+            <td>{{ c.category }}</td>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <div class="progress flex-grow-1" style="height:6px;">
+                  <div class="progress-bar bg-primary"
+                       style="width:{{ (c.count / status.get('total', 1) * 100) | round(0) }}%"></div>
+                </div>
+                <span class="fw-semibold">{{ c.count }}</span>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty-state py-3"><p>No category data yet.</p></div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ── Priority Table ── -->
+  <div class="col-md-6">
+    <div class="sp-card h-100">
+      <div class="sp-card-header">
+        <h5 class="sp-card-title"><i class="bi bi-flag me-1 text-danger"></i>Priority Breakdown</h5>
+      </div>
+      {% if priorities %}
+      <table class="sp-table">
+        <thead><tr><th>Priority</th><th>Count</th><th>%</th></tr></thead>
+        <tbody>
+          {% for p in priorities | sort(attribute='priority') %}
+          <tr>
+            <td><span class="badge-status badge-{{ p.priority | lower }}">{{ p.priority }}</span></td>
+            <td class="fw-semibold">{{ p.count }}</td>
+            <td class="text-muted" style="font-size:.82rem;">
+              {{ (p.count / status.get('total', 1) * 100) | round(1) }}%
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty-state py-3"><p>No priority data yet.</p></div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ── Resolution Trends ── -->
+  <div class="col-12">
+    <div class="sp-card">
+      <div class="sp-card-header">
+        <h5 class="sp-card-title"><i class="bi bi-calendar3 me-1 text-success"></i>Resolution Trend (Last 30 Days)</h5>
+      </div>
+      {% if trends %}
+      <table class="sp-table">
+        <thead><tr><th>Date</th><th>Resolved Tickets</th></tr></thead>
+        <tbody>
+          {% for t in trends %}
+          <tr>
+            <td>{{ t.date }}</td>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <div class="progress" style="width:100px;height:6px;">
+                  <div class="progress-bar bg-success" style="width:{{ [t.count * 10, 100] | min }}%"></div>
+                </div>
+                {{ t.count }}
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty-state py-3"><p>No resolution data yet.</p></div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Engineer Performance ── -->
+<div class="sp-card">
+  <div class="sp-card-header">
+    <h5 class="sp-card-title"><i class="bi bi-person-lines-fill me-1 text-primary"></i>Engineer Performance Report</h5>
+  </div>
+  {% if engineers %}
+  <div class="table-responsive">
+    <table class="sp-table">
+      <thead>
+        <tr>
+          <th>Engineer</th>
+          <th>Assigned</th>
+          <th>Resolved</th>
+          <th>Closed</th>
+          <th>Open</th>
+          <th>Resolution Rate</th>
+          <th>Performance</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for eng in engineers | sort(attribute='resolution_rate', reverse=True) %}
+        <tr>
+          <td class="fw-medium">{{ eng.engineer_name }}</td>
+          <td>{{ eng.assigned }}</td>
+          <td class="text-success fw-semibold">{{ eng.resolved }}</td>
+          <td class="text-secondary">{{ eng.closed }}</td>
+          <td>{{ eng.open }}</td>
+          <td>{{ eng.resolution_rate }}%</td>
+          <td style="width:140px;">
+            <div class="progress" style="height:8px;border-radius:4px;">
+              {% if eng.resolution_rate >= 80 %}
+                <div class="progress-bar bg-success" style="width:{{ eng.resolution_rate }}%"></div>
+              {% elif eng.resolution_rate >= 50 %}
+                <div class="progress-bar bg-warning" style="width:{{ eng.resolution_rate }}%"></div>
+              {% else %}
+                <div class="progress-bar bg-danger" style="width:{{ eng.resolution_rate }}%"></div>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state py-3">
+    <i class="bi bi-people"></i>
+    <p>No engineer performance data yet.</p>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}

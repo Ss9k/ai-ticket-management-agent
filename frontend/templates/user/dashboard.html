@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}My Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1><i class="bi bi-grid-1x2 me-2 text-primary"></i>SupportPilot AI</h1>
+  <p>Describe your IT problem and let AI help you resolve it instantly.</p>
+</div>
+
+<!-- ── AI Query Section ── -->
+<div class="ai-query-section">
+  <div class="section-label"><i class="bi bi-robot me-1"></i>AI Assistant</div>
+  <h2>What's the problem?</h2>
+
+  <div class="mb-3">
+    <label class="form-label text-white-50" style="font-size:.82rem;">Problem Title</label>
+    <input type="text" id="problem-title" class="form-control"
+           placeholder="e.g. Cannot connect to VPN, Outlook not opening...">
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label text-white-50" style="font-size:.82rem;">Problem Description</label>
+    <textarea id="problem-description" class="form-control" rows="3"
+              placeholder="Describe your issue in detail — what happened, error messages, steps you've tried..."></textarea>
+  </div>
+
+  <button id="btn-ask-ai" class="btn btn-light fw-semibold px-4">
+    <i class="bi bi-stars me-1" style="color:#2563eb;"></i> Get AI Solution
+  </button>
+</div>
+
+<!-- ── AI Result Section ── -->
+<div id="ai-result-section" class="sp-card">
+  <div class="ai-result-header">
+    <span class="ai-icon">🤖</span>
+    <div>
+      <div class="ai-label">SupportPilot AI Response</div>
+      <span id="ctx-badge" class="badge bg-success" style="font-size:.7rem;display:none;">
+        <i class="bi bi-database-check me-1"></i>Knowledge Base Used
+      </span>
+    </div>
+  </div>
+
+  <div id="ai-response-content" class="ai-response-box"></div>
+
+  <div class="ai-actions">
+    <button id="btn-works" class="btn btn-success">
+      <i class="bi bi-check-circle me-1"></i> Works — Problem Solved
+    </button>
+    <button id="btn-didnt-work" class="btn btn-outline-danger">
+      <i class="bi bi-x-circle me-1"></i> Didn't Work — Create Support Ticket
+    </button>
+  </div>
+</div>
+
+<!-- ── My Tickets ── -->
+<div id="tickets" class="sp-card mt-2">
+  <div class="sp-card-header">
+    <h5 class="sp-card-title"><i class="bi bi-ticket-detailed me-1 text-primary"></i>My Tickets</h5>
+    <span class="badge bg-secondary">{{ tickets | length }}</span>
+  </div>
+
+  {% if tickets %}
+  <div class="table-responsive">
+    <table class="sp-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Title</th>
+          <th>Status</th>
+          <th>Priority</th>
+          <th>Category</th>
+          <th>Assigned To</th>
+          <th>Created</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ticket in tickets %}
+        <tr>
+          <td><span class="text-muted">#</span>{{ ticket.id }}</td>
+          <td>
+            <span class="fw-medium">{{ ticket.title | truncate(50) }}</span>
+          </td>
+          <td>
+            {% set s = ticket.status %}
+            <span class="badge-status badge-{{ s }}">{{ s | title }}</span>
+          </td>
+          <td>
+            {% if ticket.priority %}
+              <span class="badge-status badge-{{ ticket.priority | lower }}">{{ ticket.priority }}</span>
+            {% else %}
+              <span class="text-muted">—</span>
+            {% endif %}
+          </td>
+          <td>{{ ticket.category or '—' }}</td>
+          <td>{{ ticket.assigned_engineer_name or '<span class="text-muted">Unassigned</span>' | safe }}</td>
+          <td style="white-space:nowrap;font-size:.8rem;color:#64748b;">
+            {{ ticket.created_at[:10] if ticket.created_at else '—' }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <i class="bi bi-ticket"></i>
+    <p>No tickets yet. Use the AI assistant above to get help — tickets are only created if the AI can't solve your problem.</p>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/user.js') }}"></script>
+{% endblock %}

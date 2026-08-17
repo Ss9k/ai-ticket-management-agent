@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Register{% endblock %}
+
+{% block auth_content %}
+<div class="sp-auth-wrapper">
+  <div class="sp-auth-card">
+
+    <div class="sp-auth-logo">
+      <div class="logo-text">
+        <i class="bi bi-headset-vr me-1" style="color:#2563eb;"></i>SupportPilot
+      </div>
+      <div class="tagline">Create Your Account</div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-sm py-2 mb-3" style="font-size:0.83rem;">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('auth.register') }}" novalidate>
+      <div class="mb-3">
+        <label class="sp-form-label" for="name">Full Name</label>
+        <input type="text" id="name" name="name" class="sp-form-control form-control"
+               placeholder="John Smith" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="sp-form-label" for="email">Email Address</label>
+        <input type="email" id="email" name="email" class="sp-form-control form-control"
+               placeholder="you@company.com" required autocomplete="email">
+      </div>
+
+      <div class="mb-3">
+        <label class="sp-form-label" for="password">Password</label>
+        <input type="password" id="password" name="password" class="sp-form-control form-control"
+               placeholder="Min. 8 characters" required autocomplete="new-password">
+      </div>
+
+      <div class="mb-4">
+        <label class="sp-form-label" for="role">Account Type</label>
+        <select id="role" name="role" class="form-select" style="font-size:0.875rem;">
+          <option value="user">User — Report IT issues</option>
+          <option value="engineer">Engineer — Resolve IT tickets (requires approval)</option>
+        </select>
+        <div id="engineer-note" style="display:none;margin-top:0.4rem;font-size:0.78rem;color:#d97706;">
+          <i class="bi bi-info-circle me-1"></i>Engineer accounts require admin approval before access.
+        </div>
+      </div>
+
+      <button type="submit" class="btn-sp-primary w-100 justify-content-center" style="padding:.625rem;">
+        <i class="bi bi-person-plus"></i> Create Account
+      </button>
+    </form>
+
+    <div class="text-center mt-3" style="font-size:0.83rem;color:#64748b;">
+      Already have an account?
+      <a href="{{ url_for('auth.login') }}" class="fw-semibold">Sign in</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('role').addEventListener('change', function () {
+    document.getElementById('engineer-note').style.display = this.value === 'engineer' ? 'block' : 'none';
+  });
+</script>
+{% endblock %}

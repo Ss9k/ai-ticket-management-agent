@@ -1,0 +1,84 @@
+/* SupportPilot — Page-Specific Styles */
+
+/* ── User Dashboard ── */
+.ai-query-section {
+  background: linear-gradient(135deg, #1e293b 0%, #1e40af 100%);
+  border-radius: 0.75rem;
+  padding: 1.75rem;
+  color: #fff;
+  margin-bottom: 1.5rem;
+}
+.ai-query-section .section-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #93c5fd;
+  margin-bottom: 0.35rem;
+}
+.ai-query-section h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem; }
+.ai-query-section .form-control, .ai-query-section .form-select {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff;
+}
+.ai-query-section .form-control::placeholder { color: rgba(255,255,255,0.5); }
+.ai-query-section .form-control:focus {
+  background: rgba(255,255,255,0.15);
+  border-color: rgba(255,255,255,0.5);
+  box-shadow: none;
+  color: #fff;
+}
+
+/* ── AI Result section ── */
+#ai-result-section { display: none; }
+.ai-result-header {
+  background: var(--sp-primary-light);
+  border-radius: var(--sp-radius);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.ai-result-header .ai-icon { font-size: 1.5rem; }
+.ai-result-header .ai-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sp-primary); font-weight: 600; }
+
+.ai-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--sp-border);
+}
+
+/* ── Engineer Dashboard Charts ── */
+.chart-container { position: relative; height: 240px; }
+
+/* ── Ticket Detail ── */
+.ticket-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+.ticket-meta-item {
+  background: #f8fafc;
+  border: 1px solid var(--sp-border);
+  border-radius: var(--sp-radius);
+  padding: 0.75rem;
+}
+.ticket-meta-item .meta-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--sp-text-muted); }
+.ticket-meta-item .meta-value { font-size: 0.9rem; font-weight: 600; color: var(--sp-text-primary); margin-top: 0.2rem; }
+
+/* ── Analytics Charts ── */
+.analytics-chart-card { background: var(--sp-card-bg); border-radius: var(--sp-radius); border: 1px solid var(--sp-border); box-shadow: var(--sp-shadow); padding: 1.25rem; }
+.analytics-chart-card .chart-title { font-size: 0.9rem; font-weight: 600; color: var(--sp-text-primary); margin-bottom: 1rem; }
+
+/* ── Empty State ── */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--sp-text-muted);
+}
+.empty-state i { font-size: 2.5rem; opacity: 0.4; margin-bottom: 0.75rem; display: block; }
+.empty-state p { font-size: 0.9rem; }

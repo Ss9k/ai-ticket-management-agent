@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+{% block title %}Analytics{% endblock %}
+
+{% block content %}
+{% set status = data.get('status_counts', {}) if data else {} %}
+{% set categories = data.get('category_counts', []) if data else [] %}
+{% set priorities = data.get('priority_counts', []) if data else [] %}
+{% set trends = data.get('resolution_trends', []) if data else [] %}
+{% set engineers = data.get('engineer_performance', []) if data else [] %}
+
+<div class="page-header">
+  <h1><i class="bi bi-bar-chart-line me-2 text-primary"></i>Analytics Dashboard</h1>
+  <p>Live view of support ticket metrics and engineer performance.</p>
+</div>
+
+<!-- ── KPI Row ── -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md">
+    <div class="kpi-card">
+      <div class="kpi-icon blue"><i class="bi bi-collection"></i></div>
+      <div><div class="kpi-value">{{ status.get('total', 0) }}</div><div class="kpi-label">Total Tickets</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-md">
+    <div class="kpi-card">
+      <div class="kpi-icon yellow"><i class="bi bi-hourglass"></i></div>
+      <div><div class="kpi-value">{{ status.get('pending', 0) }}</div><div class="kpi-label">Pending</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-md">
+    <div class="kpi-card">
+      <div class="kpi-icon red"><i class="bi bi-lightning-charge"></i></div>
+      <div><div class="kpi-value">{{ status.get('escalated', 0) }}</div><div class="kpi-label">Escalated</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-md">
+    <div class="kpi-card">
+      <div class="kpi-icon green"><i class="bi bi-check-circle"></i></div>
+      <div><div class="kpi-value">{{ status.get('resolved', 0) }}</div><div class="kpi-label">Resolved</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-md">
+    <div class="kpi-card">
+      <div class="kpi-icon gray"><i class="bi bi-archive"></i></div>
+      <div><div class="kpi-value">{{ status.get('closed', 0) }}</div><div class="kpi-label">Closed</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+
+  <!-- ── Category Chart ── -->
+  <div class="col-md-5">
+    <div class="analytics-chart-card h-100">
+      <div class="chart-title"><i class="bi bi-pie-chart me-1 text-primary"></i>Tickets by Category</div>
+      {% if categories %}
+      <div class="chart-container">
+        <canvas id="cat-chart"></canvas>
+      </div>
+      {% else %}
+      <div class="empty-state py-3"><p>No category data yet.</p></div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ── Priority Chart ── -->
+  <div class="col-md-7">
+    <div class="analytics-chart-card h-100">
+      <div class="chart-title"><i class="bi bi-bar-chart me-1 text-primary"></i>Tickets by Priority</div>
+      {% if priorities %}
+      <div class="chart-container">
+        <canvas id="pri-chart"></canvas>
+      </div>
+      {% else %}
+      <div class="empty-state py-3"><p>No priority data yet.</p></div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ── Resolution Trend ── -->
+  <div class="col-12">
+    <div class="analytics-chart-card">
+      <div class="chart-title"><i class="bi bi-graph-up me-1 text-success"></i>Resolution Trend (Last 30 Days)</div>
+      {% if trends %}
+      <div class="chart-container" style="height:200px;">
+        <canvas id="trend-chart"></canvas>
+      </div>
+      {% else %}
+      <div class="empty-state py-3"><p>No resolution trend data available yet.</p></div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Engineer Performance Table ── -->
+<div class="sp-card">
+  <div class="sp-card-header">
+    <h5 class="sp-card-title"><i class="bi bi-people me-1 text-primary"></i>Engineer Performance</h5>
+  </div>
+  {% if engineers %}
+  <div class="table-responsive">
+    <table class="sp-table">
+      <thead>
+        <tr>
+          <th>Engineer</th>
+          <th>Assigned</th>
+          <th>Resolved</th>
+          <th>Closed</th>
+          <th>Open</th>
+          <th>Resolution Rate</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for eng in engineers %}
+        <tr>
+          <td class="fw-medium">{{ eng.engineer_name }}</td>
+          <td>{{ eng.assigned }}</td>
+          <td><span class="text-success">{{ eng.resolved }}</span></td>
+          <td><span class="text-secondary">{{ eng.closed }}</span></td>
+          <td>{{ eng.open }}</td>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <div class="progress flex-grow-1" style="height:6px;width:80px;">
+                <div class="progress-bar bg-success" style="width:{{ eng.resolution_rate }}%"></div>
+              </div>
+              <span style="font-size:.82rem;font-weight:600;">{{ eng.resolution_rate }}%</span>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state py-3">
+    <i class="bi bi-people"></i>
+    <p>No engineer performance data yet.</p>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script>
+  // Debug: Log the data to console
+  console.log('Analytics Data:', {
+    categories: {{ (categories | tojson) if categories else '[]' }},
+    priorities: {{ (priorities | tojson) if priorities else '[]' }},
+    trends: {{ (trends | tojson) if trends else '[]' }}
+  });
+
+  // Check if Chart.js loaded
+  if (typeof Chart === 'undefined') {
+    console.error('Chart.js failed to load! Charts will not render.');
+    console.error('This may be due to browser tracking prevention or ad blocker.');
+    console.error('Please disable tracking prevention for localhost or use a different browser.');
+  } else {
+    console.log('Chart.js loaded successfully, version:', Chart.version);
+  }
+
+  // Category Chart
+  {% if categories and categories|length > 0 %}
+  try {
+    const catLabels = {{ (categories | map(attribute='category') | list) | tojson }};
+    const catData   = {{ (categories | map(attribute='count') | list) | tojson }};
+    console.log('Rendering category chart:', {labels: catLabels, data: catData});
+    if (catLabels && catLabels.length > 0 && catData && catData.length > 0) {
+      if (typeof Chart !== 'undefined') {
+        renderDoughnut('cat-chart', catLabels, catData);
+        console.log('Category chart rendered');
+      } else {
+        console.error('Cannot render category chart - Chart.js not loaded');
+      }
+    }
+  } catch (e) {
+    console.error('Failed to render category chart:', e);
+  }
+  {% else %}
+  console.log('No category data to display');
+  {% endif %}
+
+  // Priority Chart
+  {% if priorities and priorities|length > 0 %}
+  try {
+    const priLabels = {{ (priorities | map(attribute='priority') | list) | tojson }};
+    const priData   = {{ (priorities | map(attribute='count') | list) | tojson }};
+    console.log('Rendering priority chart:', {labels: priLabels, data: priData});
+    if (priLabels && priLabels.length > 0 && priData && priData.length > 0) {
+      if (typeof Chart !== 'undefined') {
+        renderBar('pri-chart', priLabels, priData, 'Tickets', ['#dc2626','#d97706','#ca8a04','#16a34a']);
+        console.log('Priority chart rendered');
+      } else {
+        console.error('Cannot render priority chart - Chart.js not loaded');
+      }
+    }
+  } catch (e) {
+    console.error('Failed to render priority chart:', e);
+  }
+  {% else %}
+  console.log('No priority data to display');
+  {% endif %}
+
+  // Resolution Trend Chart
+  {% if trends and trends|length > 0 %}
+  try {
+    const trendLabels = {{ (trends | map(attribute='date') | list) | tojson }};
+    const trendData   = {{ (trends | map(attribute='count') | list) | tojson }};
+    console.log('Rendering trend chart:', {labels: trendLabels, data: trendData});
+    if (trendLabels && trendLabels.length > 0 && trendData && trendData.length > 0) {
+      if (typeof Chart !== 'undefined') {
+        renderLine('trend-chart', trendLabels, trendData, 'Resolved Tickets');
+        console.log('Trend chart rendered');
+      } else {
+        console.error('Cannot render trend chart - Chart.js not loaded');
+      }
+    }
+  } catch (e) {
+    console.error('Failed to render trend chart:', e);
+  }
+  {% else %}
+  console.log('No trend data to display');
+  {% endif %}
+</script>
+{% endblock %}

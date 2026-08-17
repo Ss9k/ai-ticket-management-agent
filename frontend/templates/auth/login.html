@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block auth_content %}
+<div class="sp-auth-wrapper">
+  <div class="sp-auth-card">
+
+    <div class="sp-auth-logo">
+      <div class="logo-text">
+        <i class="bi bi-headset-vr me-1" style="color:#2563eb;"></i>SupportPilot
+      </div>
+      <div class="tagline">AI-Powered Enterprise IT Support</div>
+    </div>
+
+    <!-- Flash messages inside auth card -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-sm py-2 mb-3" style="font-size:0.83rem;">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('auth.login') }}" novalidate>
+      <div class="mb-3">
+        <label class="sp-form-label" for="email">Email Address</label>
+        <input type="email" id="email" name="email" class="sp-form-control form-control"
+               placeholder="you@company.com" required autocomplete="email">
+      </div>
+
+      <div class="mb-4">
+        <label class="sp-form-label" for="password">Password</label>
+        <input type="password" id="password" name="password" class="sp-form-control form-control"
+               placeholder="••••••••" required autocomplete="current-password">
+      </div>
+
+      <button type="submit" class="btn-sp-primary w-100 justify-content-center" style="padding:.625rem;">
+        <i class="bi bi-box-arrow-in-right"></i> Sign In
+      </button>
+    </form>
+
+    <div class="text-center mt-3" style="font-size:0.83rem; color:#64748b;">
+      Don't have an account?
+      <a href="{{ url_for('auth.register') }}" class="fw-semibold">Register here</a>
+    </div>
+
+    <!-- Demo credentials hint
+    <div class="mt-4 p-3 rounded" style="background:#f8fafc;border:1px solid #e2e8f0;font-size:0.78rem;color:#64748b;">
+      <div class="fw-semibold mb-1" style="color:#475569;"><i class="bi bi-info-circle me-1"></i>Demo Credentials</div>
+       -->
+    </div>
+
+  </div>
+</div>
+{% endblock %}

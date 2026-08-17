@@ -1,0 +1,80 @@
+<!-- Unified Sidebar — renders links based on role -->
+<aside class="sp-sidebar" id="sp-sidebar">
+  <nav>
+
+    {% set role = session.get('role', '') %}
+
+    <!-- USER sidebar -->
+    {% if role == 'user' %}
+    <div class="sidebar-section">Navigation</div>
+    <ul class="nav flex-column">
+      <li class="nav-item">
+        <a href="{{ url_for('user.dashboard') }}" class="{{ 'active' if request.endpoint == 'user.dashboard' }}">
+          <i class="bi bi-grid-1x2"></i> Dashboard
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{{ url_for('user.dashboard') }}#tickets">
+          <i class="bi bi-ticket-detailed"></i> My Tickets
+        </a>
+      </li>
+    </ul>
+
+    <!-- ENGINEER sidebar -->
+    {% elif role == 'engineer' %}
+    <div class="sidebar-section">Engineer</div>
+    <ul class="nav flex-column">
+      <li class="nav-item">
+        <a href="{{ url_for('engineer.dashboard') }}" class="{{ 'active' if request.endpoint == 'engineer.dashboard' }}">
+          <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{{ url_for('engineer.tickets') }}" class="{{ 'active' if 'engineer.ticket' in request.endpoint }}">
+          <i class="bi bi-journal-text"></i> Open Tickets
+        </a>
+      </li>
+    </ul>
+
+    <!-- ADMIN sidebar -->
+    {% elif role == 'admin' %}
+    <div class="sidebar-section">Admin</div>
+    <ul class="nav flex-column">
+      <li class="nav-item">
+        <a href="{{ url_for('admin.dashboard') }}" class="{{ 'active' if request.endpoint == 'admin.dashboard' }}">
+          <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{{ url_for('admin.dashboard') }}#pending-engineers">
+          <i class="bi bi-person-check"></i> Pending Engineers
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{{ url_for('admin.dashboard') }}#tickets">
+          <i class="bi bi-collection"></i> Tickets
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{{ url_for('analytics.analytics') }}" class="{{ 'active' if request.endpoint == 'analytics.analytics' }}">
+          <i class="bi bi-bar-chart-line"></i> Analytics
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{{ url_for('analytics.reports') }}" class="{{ 'active' if request.endpoint == 'analytics.reports' }}">
+          <i class="bi bi-file-earmark-bar-graph"></i> Reports
+        </a>
+      </li>
+    </ul>
+    {% endif %}
+
+    <!-- Logout at bottom -->
+    <div style="position:absolute;bottom:1.5rem;left:0;right:0;padding:0 0.75rem;">
+      <a href="{{ url_for('auth.logout') }}" class="d-flex align-items-center gap-2 text-danger"
+         style="padding:0.55rem 0.5rem;border-radius:var(--sp-radius);font-size:0.875rem;">
+        <i class="bi bi-power"></i> Logout
+      </a>
+    </div>
+
+  </nav>
+</aside>

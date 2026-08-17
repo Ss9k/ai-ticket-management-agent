@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1><i class="bi bi-shield-check me-2 text-primary"></i>Admin Dashboard</h1>
+  <p>Manage engineer approvals, ticket assignments, and monitor the support pipeline.</p>
+</div>
+
+<!-- ── KPI Row ── -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="kpi-card">
+      <div class="kpi-icon yellow"><i class="bi bi-person-badge"></i></div>
+      <div>
+        <div class="kpi-value">{{ pending_engineers | length }}</div>
+        <div class="kpi-label">Pending Engineers</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="kpi-card">
+      <div class="kpi-icon blue"><i class="bi bi-collection"></i></div>
+      <div>
+        <div class="kpi-value">{{ tickets | length }}</div>
+        <div class="kpi-label">Total Tickets</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="kpi-card">
+      <div class="kpi-icon red"><i class="bi bi-exclamation-triangle"></i></div>
+      <div>
+        <div class="kpi-value">{{ tickets | selectattr('status', 'equalto', 'pending') | list | length }}</div>
+        <div class="kpi-label">Pending Tickets</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="kpi-card">
+      <div class="kpi-icon green"><i class="bi bi-check-circle"></i></div>
+      <div>
+        <div class="kpi-value">{{ approved_engineers | length }}</div>
+        <div class="kpi-label">Active Engineers</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Pending Engineer Approvals ── -->
+<div id="pending-engineers" class="sp-card mb-4">
+  <div class="sp-card-header">
+    <h5 class="sp-card-title"><i class="bi bi-person-check me-1 text-warning"></i>Pending Engineer Requests</h5>
+    {% if pending_engineers %}
+      <span class="badge bg-warning text-dark">{{ pending_engineers | length }}</span>
+    {% endif %}
+  </div>
+
+  {% if pending_engineers %}
+  <div class="table-responsive">
+    <table class="sp-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Registered</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for eng in pending_engineers %}
+        <tr>
+          <td>#{{ eng.id }}</td>
+          <td class="fw-medium">{{ eng.name }}</td>
+          <td>{{ eng.email }}</td>
+          <td style="font-size:.8rem;color:#64748b;">{{ eng.created_at[:10] if eng.created_at else '—' }}</td>
+          <td>
+            <form method="POST" action="{{ url_for('admin.approve_engineer') }}" class="d-inline">
+              <input type="hidden" name="engineer_id" value="{{ eng.id }}">
+              <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Approve {{ eng.name }}?')">
+                <i class="bi bi-check-circle me-1"></i>Approve
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state py-3">
+    <i class="bi bi-person-check" style="font-size:1.8rem;"></i>
+    <p>No pending engineer approvals.</p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- ── All Tickets ── -->
+<div id="tickets" class="sp-card">
+  <div class="sp-card-header">
+    <h5 class="sp-card-title"><i class="bi bi-collection me-1 text-primary"></i>All Support Tickets</h5>
+    <span class="badge bg-secondary">{{ tickets | length }}</span>
+  </div>
+
+  {% if tickets %}
+  <div class="table-responsive">
+    <table class="sp-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Title</th>
+          <th>User</th>
+          <th>Status</th>
+          <th>Priority</th>
+          <th>Category</th>
+          <th>Assigned To</th>
+          <th>Created</th>
+          <th>Assign Engineer</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ticket in tickets %}
+        <tr>
+          <td><span class="text-muted">#</span>{{ ticket.id }}</td>
+          <td><span class="fw-medium">{{ ticket.title | truncate(40) }}</span></td>
+          <td style="font-size:.82rem;">{{ ticket.user_email or '—' }}</td>
+          <td>
+            <span class="badge-status badge-{{ ticket.status }}">{{ ticket.status | title }}</span>
+          </td>
+          <td>
+            {% if ticket.priority %}
+              <span class="badge-status badge-{{ ticket.priority | lower }}">{{ ticket.priority }}</span>
+            {% else %}<span class="text-muted">—</span>{% endif %}
+          </td>
+          <td style="font-size:.82rem;">{{ ticket.category or '—' }}</td>
+          <td style="font-size:.82rem;">{{ ticket.assigned_engineer_name or '<em class="text-muted">Unassigned</em>' | safe }}</td>
+          <td style="font-size:.8rem;color:#64748b;white-space:nowrap;">{{ ticket.created_at[:10] if ticket.created_at else '—' }}</td>
+          <td>
+            {% if ticket.status in ('pending', 'escalated') %}
+            <form method="POST" action="{{ url_for('admin.assign_engineer') }}" class="d-flex gap-1 align-items-center">
+              <input type="hidden" name="ticket_id" value="{{ ticket.id }}">
+              <select name="engineer_id" class="form-select form-select-sm" style="min-width:130px;font-size:.8rem;">
+                <option value="">Select Engineer</option>
+                {% for eng in approved_engineers %}
+                <option value="{{ eng.id }}" {{ 'selected' if ticket.assigned_engineer_id == eng.id }}>
+                  {{ eng.name }}
+                </option>
+                {% endfor %}
+              </select>
+              <button type="submit" class="btn btn-sm btn-primary" style="white-space:nowrap;">
+                <i class="bi bi-person-fill-up"></i> Assign
+              </button>
+            </form>
+            {% else %}
+              <span class="text-muted" style="font-size:.8rem;">{{ ticket.status | title }}</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state py-3">
+    <i class="bi bi-ticket" style="font-size:1.8rem;"></i>
+    <p>No tickets in the system yet.</p>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}

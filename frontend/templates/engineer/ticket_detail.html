@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+{% block title %}Ticket #{{ ticket.id }}{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex align-items-start justify-content-between flex-wrap gap-2">
+  <div>
+    <h1>
+      <a href="{{ url_for('engineer.tickets') }}" class="text-muted me-2" style="font-size:1rem;">
+        <i class="bi bi-arrow-left"></i>
+      </a>
+      Ticket #{{ ticket.id }}
+    </h1>
+    <p class="mb-0">{{ ticket.title }}</p>
+  </div>
+  <span class="badge-status badge-{{ ticket.status }} fs-6 mt-1">{{ ticket.status | title }}</span>
+</div>
+
+<!-- ── Metadata Grid ── -->
+<div class="ticket-meta-grid mb-4">
+  <div class="ticket-meta-item">
+    <div class="meta-label">Priority</div>
+    <div class="meta-value">
+      {% if ticket.priority %}<span class="badge-status badge-{{ ticket.priority | lower }}">{{ ticket.priority }}</span>{% else %}—{% endif %}
+    </div>
+  </div>
+  <div class="ticket-meta-item">
+    <div class="meta-label">Severity</div>
+    <div class="meta-value">
+      {% if ticket.severity %}<span class="badge-status badge-{{ ticket.severity | lower }}">{{ ticket.severity }}</span>{% else %}—{% endif %}
+    </div>
+  </div>
+  <div class="ticket-meta-item">
+    <div class="meta-label">Category</div>
+    <div class="meta-value">{{ ticket.category or '—' }}</div>
+  </div>
+  <div class="ticket-meta-item">
+    <div class="meta-label">Reported By</div>
+    <div class="meta-value">{{ ticket.user_name or '—' }}</div>
+  </div>
+  <div class="ticket-meta-item">
+    <div class="meta-label">User Email</div>
+    <div class="meta-value" style="font-size:.82rem;">{{ ticket.user_email or '—' }}</div>
+  </div>
+  <div class="ticket-meta-item">
+    <div class="meta-label">Created</div>
+    <div class="meta-value" style="font-size:.82rem;">{{ ticket.created_at[:10] if ticket.created_at else '—' }}</div>
+  </div>
+  {% if ticket.resolved_at %}
+  <div class="ticket-meta-item">
+    <div class="meta-label">Resolved</div>
+    <div class="meta-value" style="font-size:.82rem;">{{ ticket.resolved_at[:10] }}</div>
+  </div>
+  {% endif %}
+  {% if ticket.closed_at %}
+  <div class="ticket-meta-item">
+    <div class="meta-label">Closed</div>
+    <div class="meta-value" style="font-size:.82rem;">{{ ticket.closed_at[:10] }}</div>
+  </div>
+  {% endif %}
+</div>
+
+<div class="row g-3">
+
+  <!-- Left Column -->
+  <div class="col-lg-7">
+
+    <!-- ── Problem Description ── -->
+    <div class="sp-card mb-3">
+      <div class="sp-card-header">
+        <h5 class="sp-card-title"><i class="bi bi-chat-text me-1 text-primary"></i>Problem Description</h5>
+      </div>
+      <p style="white-space:pre-wrap;font-size:.875rem;color:#374151;">{{ ticket.description }}</p>
+    </div>
+
+    <!-- ── AI Solution (what user saw) ── -->
+    {% if ticket.ai_solution %}
+    <div class="sp-card mb-3">
+      <div class="sp-card-header">
+        <h5 class="sp-card-title"><i class="bi bi-robot me-1 text-info"></i>AI Solution (shown to user)</h5>
+        <span class="badge bg-info text-white" style="font-size:.7rem;">AI Generated</span>
+      </div>
+      <div class="ai-response-box" style="max-height:300px;overflow-y:auto;">
+        {{ ticket.ai_solution }}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- ── AI Analysis & Recommendation (for engineer) ── -->
+    {% if ticket.ai_analysis or ticket.ai_recommendation %}
+    <div class="sp-card mb-3">
+      <div class="sp-card-header">
+        <h5 class="sp-card-title"><i class="bi bi-cpu me-1 text-purple"></i>AI Technical Analysis</h5>
+        <span class="badge bg-secondary" style="font-size:.7rem;">For Engineer Review</span>
+      </div>
+      {% if ticket.ai_analysis %}
+      <div class="mb-3">
+        <div class="sp-form-label">AI Analysis</div>
+        <div class="p-3 rounded" style="background:#f0f4ff;border:1px solid #c7d7ff;font-size:.875rem;">
+          {{ ticket.ai_analysis }}
+        </div>
+      </div>
+      {% endif %}
+      {% if ticket.ai_recommendation %}
+      <div>
+        <div class="sp-form-label">AI Recommendation</div>
+        <div class="p-3 rounded" style="background:#f0fdf4;border:1px solid #bbf7d0;font-size:.875rem;">
+          {{ ticket.ai_recommendation }}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- ── Resolution History ── -->
+    <div class="sp-card">
+      <div class="sp-card-header">
+        <h5 class="sp-card-title"><i class="bi bi-clock-history me-1 text-secondary"></i>Resolution History</h5>
+      </div>
+      {% if ticket.history %}
+      <ul class="history-timeline">
+        {% for h in ticket.history %}
+        <li>
+          <div class="d-flex justify-content-between gap-2">
+            <div>
+              <div style="font-size:.875rem;">
+                <span class="fw-medium">{{ h.changed_by_name }}</span>
+                changed status:
+                {% if h.old_status %}<span class="badge-status badge-{{ h.old_status }}">{{ h.old_status | title }}</span>{% endif %}
+                → <span class="badge-status badge-{{ h.new_status }}">{{ h.new_status | title }}</span>
+              </div>
+              {% if h.remarks %}
+              <div class="mt-1 text-muted" style="font-size:.82rem;">{{ h.remarks }}</div>
+              {% endif %}
+            </div>
+            <small class="text-muted" style="white-space:nowrap;font-size:.75rem;">
+              {{ h.created_at[:16] if h.created_at else '' }}
+            </small>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <div class="empty-state py-2"><p>No history yet.</p></div>
+      {% endif %}
+    </div>
+
+  </div>
+
+  <!-- Right Column — Actions -->
+  <div class="col-lg-5">
+
+    <!-- ── Engineer Remarks ── -->
+    <div class="sp-card mb-3">
+      <div class="sp-card-header">
+        <h5 class="sp-card-title"><i class="bi bi-pencil-square me-1 text-warning"></i>Engineer Remarks</h5>
+      </div>
+      {% if ticket.engineer_remarks %}
+      <div class="p-3 mb-3 rounded" style="background:#fffbeb;border:1px solid #fef3c7;font-size:.875rem;">
+        {{ ticket.engineer_remarks }}
+      </div>
+      {% endif %}
+      {% if ticket.status in ('escalated', 'pending') %}
+      <form method="POST" action="{{ url_for('engineer.add_remarks', ticket_id=ticket.id) }}">
+        <textarea name="remarks" class="form-control form-control-sm mb-2" rows="3"
+                  placeholder="Add your investigation notes here...">{{ ticket.engineer_remarks or '' }}</textarea>
+        <button type="submit" class="btn btn-sm btn-warning">
+          <i class="bi bi-save me-1"></i>Save Remarks
+        </button>
+      </form>
+      {% endif %}
+    </div>
+
+    <!-- ── Resolve Ticket ── -->
+    {% if ticket.status in ('escalated', 'pending') %}
+    <div class="sp-card mb-3">
+      <div class="sp-card-header">
+        <h5 class="sp-card-title"><i class="bi bi-check-circle me-1 text-success"></i>Resolve Ticket</h5>
+      </div>
+      <form id="resolve-form" method="POST" action="{{ url_for('engineer.resolve_ticket', ticket_id=ticket.id) }}">
+        <div class="mb-2">
+          <label class="sp-form-label">Engineer Remarks (optional)</label>
+          <textarea name="engineer_remarks" class="form-control form-control-sm" rows="2"
+                    placeholder="Update remarks...">{{ ticket.engineer_remarks or '' }}</textarea>
+        </div>
+        <div class="mb-3">
+          <label class="sp-form-label">Resolution Notes <span class="text-danger">*</span></label>
+          <textarea id="resolution-notes" name="resolution_notes" class="form-control form-control-sm" rows="3"
+                    placeholder="Describe exactly what was done to resolve this issue...">{{ ticket.resolution_notes or '' }}</textarea>
+        </div>
+        <button type="submit" class="btn btn-success w-100">
+          <i class="bi bi-check-circle me-1"></i>Mark as Resolved
+        </button>
+      </form>
+    </div>
+    {% endif %}
+
+    <!-- ── Resolution Notes Display ── -->
+    {% if ticket.resolution_notes %}
+    <div class="sp-card mb-3">
+      <div class="sp-card-header">
+        <h5 class="sp-card-title"><i class="bi bi-file-text me-1 text-success"></i>Resolution Notes</h5>
+      </div>
+      <div class="p-3 rounded" style="background:#f0fdf4;border:1px solid #bbf7d0;font-size:.875rem;white-space:pre-wrap;">
+        {{ ticket.resolution_notes }}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- ── Close Ticket ── -->
+    {% if ticket.status == 'resolved' %}
+    <div class="sp-card">
+      <div class="sp-card-header">
+        <h5 class="sp-card-title"><i class="bi bi-archive me-1 text-secondary"></i>Close Ticket</h5>
+      </div>
+      <p style="font-size:.875rem;color:#64748b;">
+        This ticket is resolved. Close it to archive it and update analytics.
+      </p>
+      <form id="close-form" method="POST" action="{{ url_for('engineer.close_ticket', ticket_id=ticket.id) }}">
+        <button type="submit" class="btn btn-secondary w-100">
+          <i class="bi bi-archive me-1"></i>Close Ticket
+        </button>
+      </form>
+    </div>
+    {% endif %}
+
+    <!-- ── Already Closed ── -->
+    {% if ticket.status == 'closed' %}
+    <div class="sp-card">
+      <div class="text-center py-3">
+        <i class="bi bi-archive-fill text-secondary" style="font-size:2rem;"></i>
+        <p class="mt-2 text-muted" style="font-size:.875rem;">This ticket is closed.</p>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/engineer.js') }}"></script>
+{% endblock %}

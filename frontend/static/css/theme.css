@@ -1,0 +1,45 @@
+/* SupportPilot — Theme Variables */
+:root {
+  --sp-primary: #2563eb;
+  --sp-primary-dark: #1d4ed8;
+  --sp-primary-light: #dbeafe;
+  --sp-secondary: #64748b;
+  --sp-success: #16a34a;
+  --sp-warning: #d97706;
+  --sp-danger: #dc2626;
+  --sp-info: #0891b2;
+  --sp-sidebar-bg: #1e293b;
+  --sp-sidebar-text: #cbd5e1;
+  --sp-sidebar-hover: #334155;
+  --sp-sidebar-active: #2563eb;
+  --sp-navbar-bg: #ffffff;
+  --sp-body-bg: #f1f5f9;
+  --sp-card-bg: #ffffff;
+  --sp-border: #e2e8f0;
+  --sp-text-primary: #0f172a;
+  --sp-text-secondary: #475569;
+  --sp-text-muted: #94a3b8;
+  --sp-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --sp-radius: 0.5rem;
+  --sp-shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+  --sp-shadow-md: 0 4px 6px -1px rgba(0,0,0,.07), 0 2px 4px -1px rgba(0,0,0,.06);
+  --sp-sidebar-width: 240px;
+  --sp-navbar-height: 60px;
+}
+
+body {
+  font-family: var(--sp-font);
+  background-color: var(--sp-body-bg);
+  color: var(--sp-text-primary);
+  font-size: 0.9rem;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--sp-body-bg); }
+::-webkit-scrollbar-thumb { background: var(--sp-border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--sp-text-muted); }
+
+/* Links */
+a { color: var(--sp-primary); text-decoration: none; }
+a:hover { color: var(--sp-primary-dark); }
